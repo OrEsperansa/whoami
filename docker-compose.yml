@@ -3,6 +3,7 @@ name: sigit-faces
 services:
   postgres:
     image: postgres:16-alpine
+    pull_policy: never
     container_name: sigit-faces-postgres
     environment:
       POSTGRES_DB: sigit_faces
@@ -19,10 +20,8 @@ services:
       retries: 20
 
   db-setup:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: sigit-faces:local
+    image: oresperansa/sigit-faces:f81ede0
+    pull_policy: never
     container_name: sigit-faces-db-setup
     depends_on:
       postgres:
@@ -33,10 +32,8 @@ services:
     restart: "no"
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: sigit-faces:local
+    image: oresperansa/sigit-faces:f81ede0
+    pull_policy: never
     container_name: sigit-faces-web
     depends_on:
       postgres:

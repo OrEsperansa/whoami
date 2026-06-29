@@ -47,13 +47,22 @@ Open `http://localhost:3000`. The root route redirects to `/login`.
 
 ## Docker Compose
 
-Local container testing includes Postgres, a one-shot database setup service, and the Sigit Faces web container:
+Local container testing uses prebuilt images only. It includes Postgres, a one-shot database setup service, and the Sigit Faces web container:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
 Open `http://localhost:3000/login`.
+
+For offline use, preload these images on the machine before disconnecting:
+
+```bash
+docker pull postgres:16-alpine
+docker pull oresperansa/sigit-faces:f81ede0
+```
+
+The compose file uses `pull_policy: never`, so it will not build or pull images during startup.
 
 The `db-setup` service runs:
 
@@ -66,10 +75,10 @@ Uploaded trainee images are persisted in the `sigit-faces-uploads` Docker volume
 
 ## Docker Image
 
-Build the production image:
+The prebuilt production image is:
 
 ```bash
-docker build -t sigit-faces:local .
+oresperansa/sigit-faces:f81ede0
 ```
 
 Run it against an existing Postgres database:
@@ -77,7 +86,7 @@ Run it against an existing Postgres database:
 ```bash
 docker run --rm -p 3000:3000 \
   -e DATABASE_URL="postgresql://user:password@host:5432/sigit_faces?schema=public" \
-  sigit-faces:local
+  oresperansa/sigit-faces:f81ede0
 ```
 
 ## Helm
@@ -90,14 +99,14 @@ Render it locally:
 helm template sigit-faces ./charts/sigit-faces
 ```
 
-Install with an image you pushed to your registry:
+Install with the prebuilt image:
 
 ```bash
 helm upgrade --install sigit-faces ./charts/sigit-faces \
-  --set image.repository=ghcr.io/your-org/sigit-faces \
-  --set image.tag=0.1.0 \
   --set database.url="postgresql://user:password@postgres:5432/sigit_faces?schema=public"
 ```
+
+The chart defaults to `oresperansa/sigit-faces:f81ede0` and `image.pullPolicy=Never`, so OpenShift/Kubernetes will not pull or build the image. For offline clusters, preload or mirror the image into the cluster nodes/registry first.
 
 ### OpenShift Route
 
@@ -107,8 +116,6 @@ Let OpenShift generate a route host:
 
 ```bash
 helm upgrade --install sigit-faces ./charts/sigit-faces \
-  --set image.repository=your-registry/sigit-faces \
-  --set image.tag=0.1.0 \
   --set database.url="postgresql://user:password@postgres:5432/sigit_faces?schema=public"
 ```
 
@@ -116,8 +123,6 @@ Use a specific route host:
 
 ```bash
 helm upgrade --install sigit-faces ./charts/sigit-faces \
-  --set image.repository=your-registry/sigit-faces \
-  --set image.tag=0.1.0 \
   --set route.host=sigit-faces.apps.example.com \
   --set env.NEXT_PUBLIC_APP_URL=https://sigit-faces.apps.example.com \
   --set database.url="postgresql://user:password@postgres:5432/sigit_faces?schema=public"

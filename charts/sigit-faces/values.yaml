@@ -2,8 +2,8 @@ replicaCount: 1
 
 image:
   repository: oresperansa/sigit-faces
-  pullPolicy: IfNotPresent
-  tag: "latest"
+  pullPolicy: Never
+  tag: "f81ede0"
 
 imagePullSecrets: []
 nameOverride: ""
