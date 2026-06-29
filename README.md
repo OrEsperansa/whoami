@@ -110,7 +110,7 @@ The chart defaults to `oresperansa/sigit-faces:f81ede0` and `image.pullPolicy=Ne
 
 ### OpenShift Route
 
-The chart enables an OpenShift `Route` by default and keeps Kubernetes Ingress disabled.
+The chart exposes the app with an OpenShift `Route` by default.
 
 Let OpenShift generate a route host:
 
@@ -128,12 +128,6 @@ helm upgrade --install sigit-faces ./charts/sigit-faces \
   --set database.url="postgresql://user:password@postgres:5432/sigit_faces?schema=public"
 ```
 
-Disable Route and use Ingress instead:
-
-```bash
---set route.enabled=false --set ingress.enabled=true
-```
-
 Use an existing Kubernetes secret instead of creating one:
 
 ```bash
@@ -142,15 +136,6 @@ helm upgrade --install sigit-faces ./charts/sigit-faces \
   --set database.existingSecret=sigit-faces-database \
   --set database.existingSecretKey=DATABASE_URL
 ```
-
-Optional Helm hooks:
-
-```bash
---set migrations.enabled=true
---set seed.enabled=true
-```
-
-`seed.enabled=true` clears all app data and leaves the database empty.
 
 ## Demo Notes
 

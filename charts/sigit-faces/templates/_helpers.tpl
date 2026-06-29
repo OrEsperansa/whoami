@@ -28,14 +28,6 @@ app.kubernetes.io/name: {{ include "sigit-faces.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{- define "sigit-faces.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-{{- default (include "sigit-faces.fullname" .) .Values.serviceAccount.name -}}
-{{- else -}}
-{{- default "default" .Values.serviceAccount.name -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "sigit-faces.databaseSecretName" -}}
 {{- if .Values.database.existingSecret -}}
 {{- .Values.database.existingSecret -}}
