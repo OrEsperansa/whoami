@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: sigit-faces
+  repository: oresperansa/sigit-faces
   pullPolicy: IfNotPresent
   tag: "latest"
 
