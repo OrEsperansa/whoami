@@ -27,6 +27,25 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: init-database
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.init.command | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "sigit-faces.fullname" . }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "sigit-faces.databaseSecretName" . }}
+                  key: {{ .Values.database.existingSecretKey }}
+      {{- end }}
       containers:
         - name: {{ include "sigit-faces.name" . }}
           securityContext:

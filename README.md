@@ -108,6 +108,8 @@ helm upgrade --install sigit-faces ./charts/sigit-faces \
 
 The chart defaults to `oresperansa/sigit-faces:f81ede0` and `image.pullPolicy=Never`, so OpenShift/Kubernetes will not pull or build the image. For offline clusters, preload or mirror the image into the cluster nodes/registry first.
 
+By default, the Deployment runs an init container with `npm run prisma:push` before the app starts, so a single Helm install can initialize the database schema. Disable it with `--set init.enabled=false` only when the schema is managed separately.
+
 ### OpenShift Route
 
 The chart exposes the app with an OpenShift `Route` by default.

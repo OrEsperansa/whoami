@@ -40,6 +40,13 @@ route:
 
 resources: {}
 
+init:
+  enabled: true
+  command:
+    - sh
+    - -c
+    - npm run prisma:push
+
 nodeSelector: {}
 tolerations: []
 affinity: {}

@@ -17,3 +17,4 @@ Then open:
 
 Database:
   DATABASE_URL is read from secret {{ include "sigit-faces.databaseSecretName" . }} key {{ .Values.database.existingSecretKey }}.
+  init.enabled={{ .Values.init.enabled }} runs the schema initialization before the app starts.
