@@ -1,0 +1,60 @@
+name: sigit-faces
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sigit-faces-postgres
+    environment:
+      POSTGRES_DB: sigit_faces
+      POSTGRES_USER: sigit_faces
+      POSTGRES_PASSWORD: sigit_faces
+    ports:
+      - "5432:5432"
+    volumes:
+      - sigit-faces-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigit_faces -d sigit_faces"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  db-setup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sigit-faces:local
+    container_name: sigit-faces-db-setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://sigit_faces:sigit_faces@postgres:5432/sigit_faces?schema=public
+    command: sh -c "npm run prisma:push && npm run db:seed"
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sigit-faces:local
+    container_name: sigit-faces-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-setup:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://sigit_faces:sigit_faces@postgres:5432/sigit_faces?schema=public
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      STORAGE_MODE: local
+      UPLOAD_DIR: /app/public/uploads
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - sigit-faces-uploads:/app/public/uploads
+    restart: unless-stopped
+
+volumes:
+  sigit-faces-postgres:
+  sigit-faces-uploads:

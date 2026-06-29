@@ -1,0 +1,106 @@
+replicaCount: 1
+
+image:
+  repository: sigit-faces
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: sigit-faces.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+route:
+  enabled: true
+  annotations: {}
+  host: ""
+  path: /
+  wildcardPolicy: None
+  tls:
+    enabled: true
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env:
+  NEXT_PUBLIC_APP_URL: "http://sigit-faces.local"
+  STORAGE_MODE: "local"
+  UPLOAD_DIR: "/app/public/uploads"
+
+uploads:
+  persistence:
+    enabled: true
+    existingClaim: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+    storageClassName: ""
+
+database:
+  existingSecret: ""
+  existingSecretKey: "DATABASE_URL"
+  createSecret: true
+  url: "postgresql://sigit_faces:sigit_faces@postgres:5432/sigit_faces?schema=public"
+
+migrations:
+  enabled: false
+  command:
+    - sh
+    - -c
+    - npm run prisma:push
+
+seed:
+  enabled: false
+  command:
+    - sh
+    - -c
+    - npm run db:seed
+
+probes:
+  path: /login
+  initialDelaySeconds: 10
+  periodSeconds: 10

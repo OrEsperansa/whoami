@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PARTICIPANT
+  ADMIN
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String
+  avatar               String?
+  role                 Role                  @default(PARTICIPANT)
+  pinHash              String?
+  xp                   Int                   @default(0)
+  streak               Int                   @default(0)
+  createdAt            DateTime              @default(now())
+  attempts             TrainingAttempt[]
+  progress             UserPersonProgress[]
+  competitionsCreated  CompetitionSession[]  @relation("CompetitionCreator")
+  competitionResults   CompetitionResult[]
+}
+
+model Person {
+  id          String               @id @default(cuid())
+  firstName   String
+  lastName    String
+  displayName String
+  imageUrl    String
+  notes       String?
+  tags        Json
+  categoryId  String?
+  category    Category?            @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  attempts    TrainingAttempt[]
+  progress    UserPersonProgress[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String
+  icon        String?
+  createdAt   DateTime @default(now())
+  people      Person[]
+}
+
+model TrainingSet {
+  id              String               @id @default(cuid())
+  name            String
+  description     String?
+  categoryIds     Json
+  personIds       Json
+  difficultyRange Json
+  isActive        Boolean              @default(true)
+  competitions    CompetitionSession[]
+}
+
+model TrainingAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  personId        String
+  person          Person   @relation(fields: [personId], references: [id])
+  mode            String
+  difficultyLevel Int
+  wasCorrect      Boolean
+  responseTimeMs  Int
+  typedAnswer     String?
+  score           Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+model UserPersonProgress {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id])
+  personId           String
+  person             Person    @relation(fields: [personId], references: [id])
+  familiarityScore   Int       @default(0)
+  masteryLevel       Int       @default(0)
+  correctCount       Int       @default(0)
+  incorrectCount     Int       @default(0)
+  lastReviewedAt     DateTime?
+  nextReviewAt       DateTime?
+  streak             Int       @default(0)
+  confusionPersonIds Json
+
+  @@unique([userId, personId])
+}
+
+model CompetitionSession {
+  id              String              @id @default(cuid())
+  title           String
+  trainingSetId   String
+  trainingSet     TrainingSet         @relation(fields: [trainingSetId], references: [id])
+  mode            String
+  durationSeconds Int
+  questionCount   Int                 @default(20)
+  levelRange      Json
+  createdBy       String
+  creator         User                @relation("CompetitionCreator", fields: [createdBy], references: [id])
+  createdAt       DateTime            @default(now())
+  results         CompetitionResult[]
+}
+
+model CompetitionResult {
+  id                       String             @id @default(cuid())
+  competitionSessionId     String
+  competitionSession       CompetitionSession @relation(fields: [competitionSessionId], references: [id])
+  userId                   String
+  user                     User               @relation(fields: [userId], references: [id])
+  score                    Int
+  accuracy                 Float
+  averageResponseTimeMs    Int
+  completedAt              DateTime           @default(now())
+
+  @@unique([competitionSessionId, userId])
+}

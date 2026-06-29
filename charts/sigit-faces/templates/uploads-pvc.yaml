@@ -1,0 +1,17 @@
+{{- if and .Values.uploads.persistence.enabled (not .Values.uploads.persistence.existingClaim) -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "sigit-faces.fullname" . }}-uploads
+  labels:
+    {{- include "sigit-faces.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.uploads.persistence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.uploads.persistence.size }}
+  {{- with .Values.uploads.persistence.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+{{- end }}

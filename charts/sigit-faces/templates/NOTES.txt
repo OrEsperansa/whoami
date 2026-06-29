@@ -1,0 +1,28 @@
+Sigit Faces has been installed.
+
+{{- if .Values.route.enabled }}
+OpenShift Route:
+{{- if .Values.route.host }}
+  http{{ if .Values.route.tls.enabled }}s{{ end }}://{{ .Values.route.host }}{{ .Values.route.path }}
+{{- else }}
+  oc get route {{ include "sigit-faces.fullname" . }}
+{{- end }}
+{{- else if .Values.ingress.enabled }}
+Open:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+Port-forward locally:
+  kubectl port-forward svc/{{ include "sigit-faces.fullname" . }} 3000:{{ .Values.service.port }}
+
+Then open:
+  http://localhost:3000/login
+{{- end }}
+
+Database:
+  DATABASE_URL is read from secret {{ include "sigit-faces.databaseSecretName" . }} key {{ .Values.database.existingSecretKey }}.
+
+Optional jobs:
+  migrations.enabled=true runs the configured migration command as a Helm hook.
+  seed.enabled=true runs the demo seed command after install.

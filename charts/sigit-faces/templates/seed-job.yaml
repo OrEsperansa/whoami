@@ -1,0 +1,35 @@
+{{- if .Values.seed.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "sigit-faces.fullname" . }}-seed
+  labels:
+    {{- include "sigit-faces.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "sigit-faces.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "sigit-faces.serviceAccountName" . }}
+      containers:
+        - name: seed
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.seed.command | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "sigit-faces.fullname" . }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "sigit-faces.databaseSecretName" . }}
+                  key: {{ .Values.database.existingSecretKey }}
+  backoffLimit: 2
+{{- end }}
