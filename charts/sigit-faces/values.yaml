@@ -54,7 +54,6 @@ affinity: {}
 env:
   NEXT_PUBLIC_APP_URL: "http://sigit-faces.local"
   STORAGE_MODE: "local"
-  UPLOAD_DIR: "/app/public/uploads"
 
 uploads:
   persistence:

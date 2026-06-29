@@ -5,10 +5,10 @@ import { ms } from "@/lib/utils";
 export default async function ResultsPage({ searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ answers?: string }> }) {
   const query = await searchParams;
   const answers = query.answers ? JSON.parse(decodeURIComponent(query.answers)) as { correct: boolean; score: number; ms: number; personId: string }[] : [];
-  const total = answers.length || 10;
-  const correct = answers.filter((answer) => answer.correct).length || 8;
-  const score = answers.reduce((sum, answer) => sum + answer.score, 0) || 1280;
-  const avg = Math.round((answers.reduce((sum, answer) => sum + answer.ms, 0) || 22000) / total);
+  const total = answers.length;
+  const correct = answers.filter((answer) => answer.correct).length;
+  const score = answers.reduce((sum, answer) => sum + answer.score, 0);
+  const avg = total > 0 ? Math.round(answers.reduce((sum, answer) => sum + answer.ms, 0) / total) : 0;
   const missedCount = answers.filter((answer) => !answer.correct).length;
 
   return (
@@ -16,9 +16,9 @@ export default async function ResultsPage({ searchParams }: { params: Promise<{ 
       <PageHeader kicker="תוצאות התרגול" title="עבודה טובה. עכשיו יודעים על מי צריך לחזור." />
       <div className="grid gap-4 md:grid-cols-4">
         <Stat label="ניקוד" value={score.toLocaleString()} detail="נקודות שנצברו בתרגול" />
-        <Stat label="דיוק" value={`${Math.round((correct / total) * 100)}%`} detail={`${correct}/${total} נכונות`} />
+        <Stat label="דיוק" value={`${total > 0 ? Math.round((correct / total) * 100) : 0}%`} detail={`${correct}/${total} נכונות`} />
         <Stat label="מהירות ממוצעת" value={ms(avg)} detail="זמן תגובה לתשובה" />
-        <Stat label="הרצף הארוך ביותר" value={Math.max(3, correct - 1)} detail="מומנטום נקי" />
+        <Stat label="הרצף הארוך ביותר" value={correct} detail="מומנטום נקי" />
       </div>
       <Card className="mt-4">
         <div className="flex items-center justify-between">

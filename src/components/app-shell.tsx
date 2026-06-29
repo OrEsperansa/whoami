@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BarChart3, BookOpen, Dumbbell, Home, Settings, Shield, Trophy, Users } from "lucide-react";
-import { currentUser } from "@/lib/demo-data";
 import { Button } from "@/components/ui";
 
 const nav = [
@@ -14,7 +13,6 @@ const nav = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const user = currentUser();
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#0f766e33,transparent_34%),#050506]">
       <aside className="fixed inset-y-0 right-0 z-20 hidden w-64 border-l border-white/10 bg-black/40 p-4 backdrop-blur lg:block">
@@ -38,9 +36,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="absolute bottom-4 left-4 right-4 rounded-lg border border-white/10 bg-white/[0.04] p-3">
           <div className="flex items-center gap-3">
-            <img src={user.avatar} alt="" className="h-10 w-10 rounded-md" />
+            <img src="/logo.png" alt="" className="h-10 w-10 rounded-md" />
             <div>
-              <p className="text-sm font-semibold text-white">{user.name}</p>
+              <p className="text-sm font-semibold text-white">Sigit Faces</p>
               <p className="text-xs text-zinc-500">מפקד/ת בקורס</p>
             </div>
           </div>

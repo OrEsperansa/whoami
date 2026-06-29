@@ -44,7 +44,6 @@ services:
       DATABASE_URL: postgresql://sigit_faces:sigit_faces@postgres:5432/sigit_faces?schema=public
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       STORAGE_MODE: local
-      UPLOAD_DIR: /app/public/uploads
       PORT: 3000
     ports:
       - "3000:3000"

@@ -1,12 +1,21 @@
 "use client";
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { trend } from "@/lib/demo-data";
+
+const emptyTrend = [
+  { day: "א׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ב׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ג׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ד׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ה׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ו׳", accuracy: 0, speed: 0, sessions: 0 },
+  { day: "ש׳", accuracy: 0, speed: 0, sessions: 0 },
+];
 
 export function AccuracyChart() {
   return (
     <ResponsiveContainer width="100%" height={230}>
-      <AreaChart data={trend}>
+      <AreaChart data={emptyTrend}>
         <defs>
           <linearGradient id="accuracy" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.7} />
@@ -26,7 +35,7 @@ export function AccuracyChart() {
 export function SpeedChart() {
   return (
     <ResponsiveContainer width="100%" height={230}>
-      <BarChart data={trend}>
+      <BarChart data={emptyTrend}>
         <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
         <XAxis dataKey="day" stroke="#71717a" />
         <YAxis stroke="#71717a" />
@@ -40,7 +49,7 @@ export function SpeedChart() {
 export function ActivityChart() {
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={trend}>
+      <BarChart data={emptyTrend}>
         <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
         <XAxis dataKey="day" stroke="#71717a" />
         <YAxis stroke="#71717a" />

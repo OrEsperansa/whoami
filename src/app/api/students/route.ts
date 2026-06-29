@@ -3,10 +3,10 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addLocalStudents, clearLocalStudents, getLocalStudents, type LocalStudent } from "@/lib/local-store";
+import { getUploadDir, uploadedFileNameFromUrl, uploadedFilePath, uploadedFileUrl } from "@/lib/uploads";
 
 export const runtime = "nodejs";
 
-const uploadDir = path.join(process.cwd(), "public", "uploads");
 const useLocalStore = !process.env.DATABASE_URL;
 
 function studentNameFromFileName(fileName: string) {
@@ -43,11 +43,11 @@ function databaseErrorMessage(action: string, error: unknown) {
 async function persistImage(file: File, bytes: Buffer) {
   const extension = safeExtension(file.name);
   const storedFileName = `${crypto.randomUUID()}${extension}`;
-  const relativeUrl = `/uploads/${storedFileName}`;
+  const relativeUrl = uploadedFileUrl(storedFileName);
 
   try {
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, storedFileName), bytes);
+    await mkdir(getUploadDir(), { recursive: true });
+    await writeFile(uploadedFilePath(storedFileName), bytes);
     return relativeUrl;
   } catch (error) {
     console.warn("Could not write uploaded image to filesystem. Falling back to database data URL.", error);
@@ -168,8 +168,9 @@ export async function DELETE() {
     const students = await clearLocalStudents();
     await Promise.allSettled(
       students
-        .filter((student) => student.imageUrl.startsWith("/uploads/"))
-        .map((student) => unlink(path.join(process.cwd(), "public", student.imageUrl))),
+        .map((student) => uploadedFileNameFromUrl(student.imageUrl))
+        .filter((fileName): fileName is string => Boolean(fileName))
+        .map((fileName) => unlink(uploadedFilePath(fileName))),
     );
     return NextResponse.json({ deleted: students.length });
   }
@@ -189,8 +190,9 @@ export async function DELETE() {
 
     await Promise.allSettled(
       students
-        .filter((student) => student.imageUrl.startsWith("/uploads/"))
-        .map((student) => unlink(path.join(process.cwd(), "public", student.imageUrl))),
+        .map((student) => uploadedFileNameFromUrl(student.imageUrl))
+        .filter((fileName): fileName is string => Boolean(fileName))
+        .map((fileName) => unlink(uploadedFilePath(fileName))),
     );
 
     return NextResponse.json({ deleted: students.length });
