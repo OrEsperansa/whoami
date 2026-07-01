@@ -10,6 +10,7 @@ type TrainingStudent = {
   id: string;
   displayName: string;
   imageUrl: string;
+  cycleId?: string;
 };
 
 type Answer = { correct: boolean; score: number; ms: number; personId: string };
@@ -27,6 +28,7 @@ export function TrainingSession() {
   const searchParams = useSearchParams();
   const requestedLevel = clamp(Number(searchParams.get("level") ?? 3), 1, 5);
   const requestedRounds = clamp(Number(searchParams.get("rounds") ?? 10), 3, 50);
+  const cycleId = searchParams.get("cycleId") ?? "";
   const startedAt = useRef(0);
   const [students, setStudents] = useState<TrainingStudent[]>([]);
   const [deck, setDeck] = useState<TrainingStudent[]>([]);
@@ -49,7 +51,8 @@ export function TrainingSession() {
   useEffect(() => {
     async function loadStudents() {
       try {
-        const response = await fetch("/api/training/students");
+        const cycleQuery = cycleId ? `?cycleId=${encodeURIComponent(cycleId)}` : "";
+        const response = await fetch(`/api/training/students${cycleQuery}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -68,7 +71,7 @@ export function TrainingSession() {
     }
 
     loadStudents();
-  }, [requestedRounds]);
+  }, [cycleId, requestedRounds]);
 
   function answer(value: string, eventTime: number) {
     if (!person || feedback) return;
@@ -120,7 +123,7 @@ export function TrainingSession() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-zinc-400">שאלה {index + 1} מתוך {deck.length}</p>
-          <h1 className="mt-1 text-2xl font-semibold text-white">רמת קושי {requestedLevel}</h1>
+          <h1 className="mt-1 text-2xl font-semibold text-white">רמת קושי {requestedLevel}{cycleId ? ` · ${cycleId}` : ""}</h1>
         </div>
         <div className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm text-zinc-300"><Timer className="h-4 w-4" /> תרגול פעיל</div>
       </div>

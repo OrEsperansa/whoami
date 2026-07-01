@@ -73,6 +73,20 @@ npm run prisma:push && npm run db:seed
 This creates the schema and leaves the database empty by default.
 Uploaded trainee images are persisted in the `sigit-faces-uploads` Docker volume.
 
+## Mounted Cycle Images
+
+Instead of uploading students through the UI, mount or create an `images` folder next to the project:
+
+```text
+images/
+  sigit16/
+    Student One.jpg
+  sigit17/
+    Student Two.png
+```
+
+Cycle folder names must use `sigit<id>`. Training defaults to the latest cycle by sorting those IDs, and each image filename becomes the student display name.
+
 ## Docker Image
 
 The prebuilt production image is:

@@ -16,11 +16,19 @@ type TrainingStudent = {
   id: string;
   displayName: string;
   imageUrl: string;
+  cycleId?: string;
+};
+
+type CycleOption = {
+  id: string;
+  studentCount: number;
 };
 
 export function TrainClient() {
   const router = useRouter();
   const [students, setStudents] = useState<TrainingStudent[]>([]);
+  const [cycles, setCycles] = useState<CycleOption[]>([]);
+  const [cycleId, setCycleId] = useState("");
   const [level, setLevel] = useState(3);
   const [rounds, setRounds] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +45,8 @@ export function TrainClient() {
         }
 
         setStudents(data.students);
+        setCycles(data.cycles ?? []);
+        setCycleId(data.selectedCycleId ?? data.latestCycleId ?? "");
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : "טעינת החניכים נכשלה");
       } finally {
@@ -47,8 +57,31 @@ export function TrainClient() {
     loadStudents();
   }, []);
 
+  async function changeCycle(nextCycleId: string) {
+    setCycleId(nextCycleId);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/training/students?cycleId=${encodeURIComponent(nextCycleId)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "טעינת החניכים נכשלה");
+      }
+
+      setStudents(data.students);
+      setCycles(data.cycles ?? []);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "טעינת החניכים נכשלה");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   function start() {
-    router.push(`/train/session/play?level=${level}&rounds=${rounds}`);
+    const cycleQuery = cycleId ? `&cycleId=${encodeURIComponent(cycleId)}` : "";
+    router.push(`/train/session/play?level=${level}&rounds=${rounds}${cycleQuery}`);
   }
 
   return (
@@ -74,6 +107,23 @@ export function TrainClient() {
               <Images className="h-5 w-5 text-teal-300" />
               <p className="font-semibold text-white">{students.length} חניכים זמינים לתרגול</p>
             </div>
+
+            {cycles.length > 0 ? (
+              <label className="mb-5 block max-w-xs">
+                <span className="text-sm font-medium text-zinc-300">מחזור</span>
+                <select
+                  value={cycleId}
+                  onChange={(event) => changeCycle(event.target.value)}
+                  className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/40 px-3"
+                >
+                  {cycles.map((cycle) => (
+                    <option key={cycle.id} value={cycle.id}>
+                      {cycle.id} ({cycle.studentCount})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
             <div className="grid gap-3 sm:grid-cols-2">
               {difficulties.map((difficulty) => (

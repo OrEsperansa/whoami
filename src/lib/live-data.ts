@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import { getLocalCommanders, getLocalStudents } from "@/lib/local-store";
 import { prisma } from "@/lib/prisma";
+import { getMountedStudents } from "@/lib/cycle-images";
 
 const useLocalStore = !process.env.DATABASE_URL;
 
@@ -18,6 +19,7 @@ export type LiveStudent = {
   displayName: string;
   imageUrl: string;
   createdAt: Date | string;
+  cycleId?: string;
 };
 
 export async function getLiveCommanders(): Promise<LiveCommander[]> {
@@ -40,17 +42,22 @@ export async function getLiveCommanders(): Promise<LiveCommander[]> {
 }
 
 export async function getLiveStudents(): Promise<LiveStudent[]> {
+  const mountedStudents = await getMountedStudents();
+
   if (useLocalStore) {
     const students = await getLocalStudents();
-    return students.map((student) => ({
-      id: student.id,
-      displayName: student.displayName,
-      imageUrl: student.imageUrl,
-      createdAt: student.createdAt,
-    }));
+    return [
+      ...mountedStudents,
+      ...students.map((student) => ({
+        id: student.id,
+        displayName: student.displayName,
+        imageUrl: student.imageUrl,
+        createdAt: student.createdAt,
+      })),
+    ];
   }
 
-  return prisma.person.findMany({
+  const students = await prisma.person.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -59,14 +66,18 @@ export async function getLiveStudents(): Promise<LiveStudent[]> {
       createdAt: true,
     },
   });
+
+  return [...mountedStudents, ...students];
 }
 
 export async function getLiveCounts() {
+  const mountedStudents = await getMountedStudents();
+
   if (useLocalStore) {
     const [commanders, students] = await Promise.all([getLocalCommanders(), getLocalStudents()]);
     return {
       commanders: commanders.length,
-      students: students.length,
+      students: mountedStudents.length + students.length,
       attempts: 0,
     };
   }
@@ -77,5 +88,5 @@ export async function getLiveCounts() {
     prisma.trainingAttempt.count(),
   ]);
 
-  return { commanders, students, attempts };
+  return { commanders, students: mountedStudents.length + students, attempts };
 }

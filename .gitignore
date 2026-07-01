@@ -24,8 +24,10 @@
 .DS_Store
 *.pem
 .local-data/
+/images/
 /public/uploads/*
 !/public/uploads/.gitkeep
+!/images/.gitkeep
 
 # debug
 npm-debug.log*

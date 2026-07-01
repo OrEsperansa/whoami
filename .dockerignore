@@ -9,3 +9,8 @@ docker-compose.yml
 coverage
 charts/*/charts
 charts/*/*.tgz
+docker-images
+images/*
+!images/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep

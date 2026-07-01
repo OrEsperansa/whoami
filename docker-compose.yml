@@ -49,6 +49,7 @@ services:
       - "3000:3000"
     volumes:
       - sigit-faces-uploads:/app/public/uploads
+      - ./images:/app/images:ro
     restart: unless-stopped
 
 volumes:

@@ -11,6 +11,8 @@ type Student = {
   notes: string | null;
   tags: unknown;
   createdAt: string;
+  cycleId?: string;
+  source?: "mounted";
 };
 
 function nameFromFile(fileName: string) {
@@ -227,7 +229,7 @@ export function LibraryClient() {
                 <img src={student.imageUrl} alt="" className="h-24 w-24 rounded-md object-cover" />
                 <div className="min-w-0">
                   <h2 className="font-semibold text-white">{student.displayName}</h2>
-                  <p className="mt-1 text-sm text-zinc-400">נשמר בבסיס הנתונים</p>
+                  <p className="mt-1 text-sm text-zinc-400">{student.cycleId ? student.cycleId : "נשמר בבסיס הנתונים"}</p>
                 </div>
               </div>
               {student.notes ? <p className="mt-4 text-sm text-zinc-400">{student.notes}</p> : null}

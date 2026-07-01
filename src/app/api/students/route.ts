@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addLocalStudents, clearLocalStudents, getLocalStudents, type LocalStudent } from "@/lib/local-store";
 import { getUploadDir, uploadedFileNameFromUrl, uploadedFilePath, uploadedFileUrl } from "@/lib/uploads";
+import { getLatestMountedCycleId, getMountedCycleOptions, getMountedStudents } from "@/lib/cycle-images";
 
 export const runtime = "nodejs";
 
@@ -57,9 +58,15 @@ async function persistImage(file: File, bytes: Buffer) {
 }
 
 export async function GET() {
+  const [mountedStudents, cycles, latestCycleId] = await Promise.all([
+    getMountedStudents(),
+    getMountedCycleOptions(),
+    getLatestMountedCycleId(),
+  ]);
+
   if (useLocalStore) {
     const students = await getLocalStudents();
-    return NextResponse.json({ students });
+    return NextResponse.json({ students: [...mountedStudents, ...students], cycles, latestCycleId });
   }
 
   try {
@@ -77,7 +84,7 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ students });
+    return NextResponse.json({ students: [...mountedStudents, ...students], cycles, latestCycleId });
   } catch (error) {
     console.error("Failed to load students", error);
     return NextResponse.json({ error: databaseErrorMessage("לא ניתן לטעון חניכים מבסיס הנתונים", error) }, { status: 500 });
