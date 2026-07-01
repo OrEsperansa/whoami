@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .local-data/
+/docker-images/
 /images/
 /public/uploads/*
 !/public/uploads/.gitkeep
